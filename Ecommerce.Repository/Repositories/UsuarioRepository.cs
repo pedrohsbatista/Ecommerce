@@ -21,6 +21,7 @@ namespace Ecommerce.Repository.Repositories
 
         public override void Insert(Usuario entity)
         {
+            entity.Id = _usuarios.Count + 1;
             _usuarios.Add(entity);            
         }
 
