@@ -1,4 +1,5 @@
-﻿using Ecommerce.Domain.Services;
+﻿using Ecommerce.Domain.Entities;
+using Ecommerce.Domain.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Ecommerce.Api.Controllers
@@ -63,6 +64,12 @@ namespace Ecommerce.Api.Controllers
         {
             try
             {
+                var entityId = (entity as BaseEntity)?.Id ?? 0;
+                var result = _service.Get(entityId);
+
+                if (result == null)
+                    return NotFound();
+
                 _service.Update(entity);
                 return Ok(entity);
             }
@@ -78,6 +85,11 @@ namespace Ecommerce.Api.Controllers
         {
             try
             {
+                var result = _service.Get(id);
+
+                if (result == null)
+                    return NotFound();
+
                 _service.Delete(id);
                 return Ok();
             }

@@ -27,9 +27,8 @@ namespace Ecommerce.Repository.Repositories
 
         public override void Update(Usuario entity)
         {
-            var usuario = _usuarios.FirstOrDefault(x => x.Id == entity.Id);
-
-            usuario = entity;
+            var index = _usuarios.FindIndex(x => x.Id == entity.Id);
+            _usuarios[index] = entity;            
         }
 
         public override void Delete(long id)
