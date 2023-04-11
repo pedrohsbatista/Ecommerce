@@ -1,4 +1,5 @@
-﻿using Ecommerce.Domain.Entities;
+﻿using Ecommerce.Domain.Config;
+using Ecommerce.Domain.Entities;
 using Ecommerce.Domain.IRepository;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,6 +9,10 @@ namespace Ecommerce.Repository.Repositories
     public class UsuarioRepository : BaseRepository<Usuario>, IUsuarioRepository
     {
         private static List<Usuario> _usuarios = new List<Usuario>();
+
+        public UsuarioRepository(AppSettings appSettings) : base(appSettings)
+        {            
+        }
 
         public override List<Usuario> GetAll()
         {
