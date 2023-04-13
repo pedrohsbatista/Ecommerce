@@ -1,7 +1,10 @@
-﻿using Ecommerce.Domain.Config;
+﻿using Dapper;
+using Ecommerce.Domain.Config;
+using Microsoft.Extensions.Options;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Linq;
 
 namespace Ecommerce.Repository.Repositories
 {
@@ -9,14 +12,14 @@ namespace Ecommerce.Repository.Repositories
     {
         protected IDbConnection Connection { get; set; }
 
-        public BaseRepository(AppSettings appSettings)
+        public BaseRepository(IOptions<AppSettings> appSettings)
         {
-            Connection = new SqlConnection(appSettings.ConnectionStrings.ConnectionSql);
+            Connection = new SqlConnection(appSettings.Value.ConnectionStrings.ConnectionSql);            
         }
 
         public virtual List<T> GetAll()
         {
-            throw new System.NotImplementedException();
+            return Connection.Query<T>($"select * from {typeof(T).Name.ToLower()}".ToLower()).ToList();
         }
 
         public virtual T Get(long id)

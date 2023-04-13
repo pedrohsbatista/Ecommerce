@@ -1,4 +1,4 @@
-INSERT INTO [dbo].[Usuarios] (Nome, Email, Sexo, RG, CPF, NomeMae, SituacaoCadastro, DataCadastro) VALUES
+INSERT INTO [dbo].[Usuario] (Nome, Email, Sexo, RG, CPF, NomeMae, SituacaoCadastro, DataCadastro) VALUES
 ('Ana Tereza de A. Vasques', 'ana.tereza@gmail.com', 'F', '2.523.322', '478.560.690-82', 'Maria Tereza de A. Vasques', 'A', '2021-01-01 00:00:00'),
 ('José Mariano Gomes', 'jose.mariano@gmail.com', 'M', '3.152.321', '604.986.340-78', 'Antônia Mariano Gomes', 'A', '2021-01-01 00:00:00'),
 ('Heitor Patricio da Silva', 'heitor.patricio@gmail.com', 'M', '5.545.644', '664.192.410-65', 'Joséfa Patricio da Silva', 'A', '2021-01-01 00:00:00'),
@@ -10,7 +10,7 @@ INSERT INTO [dbo].[Usuarios] (Nome, Email, Sexo, RG, CPF, NomeMae, SituacaoCadas
 ('Keline Pinheiro Araujo', 'kaline.123@gmail.com', 'F', '34.511.5', '317.257.250-10', 'Karia Pinheiro Araujo', 'A', '2021-01-01 00:00:00'),
 ('Larissi Araujo da Silva', 'larissi.araujo@gmail.com', 'F', '2.154.462', '146.581.080-38', 'Maria Araujo da Silva', 'A', '2021-01-01 00:00:00');
 
-INSERT INTO [dbo].[Contatos] (UsuarioId, Telefone, Celular) VALUES
+INSERT INTO [dbo].[Contato] (UsuarioId, Telefone, Celular) VALUES
 (1, '(75) 39543-4531', '(75) 91896-3914'),
 (2, '(74) 36604-1090', '(74) 90169-1967'),
 (3, '(33) 13613-6742', '(33) 99686-3342'),
@@ -22,7 +22,7 @@ INSERT INTO [dbo].[Contatos] (UsuarioId, Telefone, Celular) VALUES
 (9, '(43) 49019-5729', '(43) 98377-2284'),
 (10, '(38) 83710-6739', '(38) 98760-2494');
 
-INSERT INTO [dbo].[EnderecosEntrega] (UsuarioId, NomeEndereco, CEP, Estado, Cidade, Bairro, Endereco, Numero, Complemento) VALUES
+INSERT INTO [dbo].[EnderecoEntrega] (UsuarioId, NomeEndereco, CEP, Estado, Cidade, Bairro, Endereco, Numero, Complemento) VALUES
 (1, 'Casa', '49700-974', 'SE', 'Capela', 'Centro', 'Rua Principal, s/n', '12', 'Casa 12 - Verde'),
 (1, 'Trabalho', '49700-974', 'SE', 'Capela', 'Centro', 'Rua Principal, s/n', '10', 'Ed. Fulano - Sala 10'),
 (1, 'Casa da mãe', '49700-901', 'SE', 'Capela', 'Centro', 'Rua Principal, s/n', '1', 'Casa 1'),
@@ -56,7 +56,7 @@ INSERT INTO [dbo].[EnderecosEntrega] (UsuarioId, NomeEndereco, CEP, Estado, Cida
 (10, 'Casa', '53425-560', 'PE', 'Paulista', 'Nossa Senhora da Conceição', 'Rua Belo Vale', '1', 'Ed. Fulano - 103');
 
 --14 registros de Departamentos
-INSERT INTO [dbo].[Departamentos] (Nome) VALUES 
+INSERT INTO [dbo].[Departamento] (Nome) VALUES 
 ('Mercado'),
 ('Celulares'),
 ('Informática e Tablets'),
@@ -73,7 +73,7 @@ INSERT INTO [dbo].[Departamentos] (Nome) VALUES
 ('Cartão, parceiros e serviços');
 
 
-INSERT INTO [dbo].[UsuariosDepartamentos] (UsuarioId, DepartamentoId) VALUES
+INSERT INTO [dbo].[UsuarioDepartamento] (UsuarioId, DepartamentoId) VALUES
 (1, 1),
 (1, 2),
 (1, 3),
