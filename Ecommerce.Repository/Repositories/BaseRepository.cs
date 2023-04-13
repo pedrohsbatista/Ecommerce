@@ -12,6 +12,8 @@ namespace Ecommerce.Repository.Repositories
     {
         protected IDbConnection Connection { get; set; }
 
+        private string _entityName => typeof(T).Name.ToLower();
+
         public BaseRepository(IOptions<AppSettings> appSettings)
         {
             Connection = new SqlConnection(appSettings.Value.ConnectionStrings.ConnectionSql);            
@@ -19,12 +21,12 @@ namespace Ecommerce.Repository.Repositories
 
         public virtual List<T> GetAll()
         {
-            return Connection.Query<T>($"select * from {typeof(T).Name.ToLower()}".ToLower()).ToList();
+            return Connection.Query<T>($"select * from {_entityName}").ToList();
         }
 
         public virtual T Get(long id)
         {
-            throw new System.NotImplementedException();
+            return Connection.QuerySingleOrDefault<T>($"select * from {_entityName} where id = @id", new { Id = id });
         }
                
         public virtual void Insert(T entity)
