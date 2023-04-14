@@ -1,5 +1,7 @@
 ﻿using Dapper;
 using Ecommerce.Domain.Config;
+using Ecommerce.Domain.Entities;
+using Ecommerce.Domain.Extensions;
 using Microsoft.Extensions.Options;
 using System.Collections.Generic;
 using System.Data;
@@ -10,7 +12,7 @@ namespace Ecommerce.Repository.Repositories
 {
     public class BaseRepository<T>
     {
-        protected IDbConnection Connection { get; set; }
+        protected IDbConnection Connection { get; set; }        
 
         private string _entityName => typeof(T).Name.ToLower();
 
@@ -31,7 +33,11 @@ namespace Ecommerce.Repository.Repositories
                
         public virtual void Insert(T entity)
         {
-            throw new System.NotImplementedException();
+            var properties = GetProperties();
+
+            var sql = $"INSERT INTO {_entityName} ({string.Join(",", properties)}) VALUES ({string.Join(",", properties.Select(x => $"@{x}"))});SELECT CAST (SCOPE_IDENTITY() AS BIGINT);";
+          
+            (entity as BaseEntity).Id = Connection.Query<long>(sql, entity).Single();
         }
 
         public virtual void Update(T entity)
@@ -42,6 +48,20 @@ namespace Ecommerce.Repository.Repositories
         public virtual void Delete(long id)
         {
             throw new System.NotImplementedException();
+        }
+
+        private List<string> GetProperties()
+        {
+            var propertiesEntity = typeof(T).GetProperties();
+            var properties = new List<string>();
+            foreach (var propertyEntity in propertiesEntity)
+            {
+                if (!propertyEntity.PropertyType.IsPrimitive())
+                    continue;
+
+                properties.Add(propertyEntity.Name);
+            }
+            return properties;
         }
     }
 }
