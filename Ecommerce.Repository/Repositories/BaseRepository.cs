@@ -49,7 +49,8 @@ namespace Ecommerce.Repository.Repositories
 
         public virtual void Delete(long id)
         {
-            throw new System.NotImplementedException();
+            var sql = $"DELETE FROM {_entityName} WHERE Id = @Id";
+            Connection.Execute(sql, new { Id = id });
         }
 
         private List<string> GetProperties()
