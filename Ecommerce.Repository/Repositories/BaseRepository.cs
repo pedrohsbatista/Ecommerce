@@ -42,7 +42,9 @@ namespace Ecommerce.Repository.Repositories
 
         public virtual void Update(T entity)
         {
-            throw new System.NotImplementedException();
+            var properties = GetProperties();
+            var sql = $"UPDATE {_entityName} SET {string.Join(",", properties.Select(x => $"{x} = @{x}"))} WHERE Id = @Id";
+            Connection.Execute(sql, entity);
         }
 
         public virtual void Delete(long id)
