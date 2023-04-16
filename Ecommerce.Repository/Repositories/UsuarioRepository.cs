@@ -13,7 +13,7 @@ namespace Ecommerce.Repository.Repositories
         {            
         }
 
-        public Usuario GetWithContato(long id)
+        public override Usuario Get(long id)
         {
            return Connection.Query<Usuario, Contato, Usuario>(
                 $"SELECT * FROM {nameof(Usuario)} T " +
@@ -26,6 +26,6 @@ namespace Ecommerce.Repository.Repositories
                 },
                 new { Id = id}
             ).SingleOrDefault();
-        }
+        }      
     }
 }
