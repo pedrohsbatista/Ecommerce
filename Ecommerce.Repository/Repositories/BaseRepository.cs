@@ -12,9 +12,7 @@ namespace Ecommerce.Repository.Repositories
 {
     public class BaseRepository<T>
     {
-        protected IDbConnection Connection { get; set; }        
-
-        private string _entityName => typeof(T).Name.ToLower();
+        protected IDbConnection Connection { get; set; }                
 
         public BaseRepository(IOptions<AppSettings> appSettings)
         {
@@ -23,48 +21,68 @@ namespace Ecommerce.Repository.Repositories
 
         public virtual List<T> GetAll()
         {
-            return Connection.Query<T>($"select * from {_entityName}").ToList();
+            return Connection.Query<T>(GetAllSql<T>()).ToList();
         }
 
         public virtual T Get(long id)
         {
-            return Connection.QuerySingleOrDefault<T>($"select * from {_entityName} where id = @id", new { Id = id });
+            return Connection.QuerySingleOrDefault<T>(GetByIdSql<T>(), new { Id = id });
         }
                
         public virtual void Insert(T entity)
-        {
-            var properties = GetProperties();
-
-            var sql = $"INSERT INTO {_entityName} ({string.Join(",", properties)}) VALUES ({string.Join(",", properties.Select(x => $"@{x}"))});SELECT CAST (SCOPE_IDENTITY() AS BIGINT);";
-          
-            (entity as BaseEntity).Id = Connection.Query<long>(sql, entity).Single();
+        {            
+            (entity as BaseEntity).Id = Connection.Query<long>(InsertSql<T>(), entity).Single();
         }
 
         public virtual void Update(T entity)
-        {
-            var properties = GetProperties();
-            var sql = $"UPDATE {_entityName} SET {string.Join(",", properties.Select(x => $"{x} = @{x}"))} WHERE Id = @Id";
-            Connection.Execute(sql, entity);
+        {               
+            Connection.Execute(UpdateSql<T>(), entity);
         }
 
         public virtual void Delete(long id)
         {
-            var sql = $"DELETE FROM {_entityName} WHERE Id = @Id";
-            Connection.Execute(sql, new { Id = id });
+            Connection.Execute(DeleteSql<T>(), new { Id = id });
         }
 
-        private List<string> GetProperties()
+        private List<string> GetProperties<T2>()
         {
-            var propertiesEntity = typeof(T).GetProperties();
+            var propertiesEntity = typeof(T2).GetProperties();
             var properties = new List<string>();
             foreach (var propertyEntity in propertiesEntity)
             {
-                if (!propertyEntity.PropertyType.IsPrimitive())
+                if (!propertyEntity.PropertyType.IsPrimitive() || propertyEntity.Name == nameof(BaseEntity.Id))
                     continue;
 
                 properties.Add(propertyEntity.Name);
             }
             return properties;
+        }
+
+        protected string GetAllSql<T2>()
+        {
+            return string.Format("SELECT * FROM {0};", typeof(T2).Name);
+        }
+
+        protected string GetByIdSql<T2>()
+        {
+            return string.Format("SELECT * FROM {0} WHERE Id = @Id;", typeof(T2).Name);
+        }
+
+        protected string InsertSql<T2>()
+        {
+            var properties = GetProperties<T2>();
+            return string.Format("INSERT INTO {0} ({1}) VALUES ({2});SELECT CAST (SCOPE_IDENTITY() AS BIGINT);", typeof(T2).Name, string.Join(",", properties), string.Join(",", properties.Select(x => $"@{x}")));
+        }
+
+        protected string UpdateSql<T2>()
+        {
+            var properties = GetProperties<T2>();
+            return string.Format("UPDATE {0} SET {1} WHERE Id = @Id;", typeof(T2).Name, string.Join(",", properties.Select(x => $"{x} = @{x}")));
+        }
+
+        protected string DeleteSql<T2>()
+        {            
+            return string.Format("DELETE FROM {0} WHERE Id = @Id;", typeof(T2).Name);
         }
     }
 }

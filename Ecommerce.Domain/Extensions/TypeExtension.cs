@@ -9,7 +9,8 @@ namespace Ecommerce.Domain.Extensions
         private static readonly List<Type> PrimitivesTypes = new List<Type>
         {
             typeof(string),
-            typeof(DateTimeOffset)
+            typeof(DateTimeOffset),
+            typeof(long)
         };
 
         public static bool IsPrimitive(this Type type)
