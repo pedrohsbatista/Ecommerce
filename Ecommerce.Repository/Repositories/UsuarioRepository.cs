@@ -35,13 +35,13 @@ namespace Ecommerce.Repository.Repositories
             var transaction = Connection.BeginTransaction();
 
             try
-            {                        
+            {                
                 entity.Id = Connection.Query<long>(InsertSql<Usuario>(), entity, transaction).Single();
-                
+                                
                 if (entity.Contato != null)
                 {
                     entity.Contato.UsuarioId = entity.Id;                    
-                    entity.Contato.Id = Connection.Query<long>(InsertSql<Contato>(), entity.Contato, transaction).Single();
+                    entity.Contato.Id = Connection.Query<long>(InsertSql<Contato>(), entity.Contato, transaction).Single();                    
                 }
 
                 transaction.Commit();
@@ -54,7 +54,32 @@ namespace Ecommerce.Repository.Repositories
             finally
             {
                 Connection.Close();
-            }          
+            }
+        }
+
+        public override void Update(Usuario entity)
+        {
+            Connection.Open();
+            var transaction = Connection.BeginTransaction();
+
+            try
+            {
+                Connection.Execute(UpdateSql<Usuario>(), entity, transaction);
+
+                if (entity.Contato != null)                
+                    Connection.Execute(UpdateSql<Contato>(), entity.Contato, transaction);                
+
+                transaction.Commit();
+            }
+            catch (Exception)
+            {
+                transaction.Rollback();
+                throw;
+            }
+            finally
+            {
+                Connection.Close();
+            }
         }
     }
 }
