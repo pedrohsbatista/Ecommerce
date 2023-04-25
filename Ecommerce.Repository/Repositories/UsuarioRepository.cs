@@ -46,17 +46,32 @@ namespace Ecommerce.Repository.Repositories
 
         public override Usuario Get(long id)
         {
-            return Connection.Query<Usuario, Contato, Usuario>(
+            Usuario usuarioMemory = null;
+
+            Connection.Query<Usuario, Contato, EnderecoEntrega, Usuario>(
                  $"SELECT * FROM {nameof(Usuario)} T " +
                  $"LEFT JOIN {nameof(Contato)} C ON C.UsuarioId = T.Id " +
+                 $"LEFT JOIN {nameof(EnderecoEntrega)} EE ON EE.UsuarioId = T.Id " +
                  $"WHERE T.Id = @Id",
-                 (usuario, contato) =>
+                 (usuario, contato, enderecoEntrega) =>
                  {
-                     usuario.Contato = contato;
+                     if (usuarioMemory == null)
+                     {
+                         usuario.Contato = contato;
+                         usuario.AddEndereco(enderecoEntrega);
+                         usuarioMemory = usuario;
+                     }
+                     else
+                     {
+                         usuarioMemory.AddEndereco(enderecoEntrega);
+                     }                                                           
+
                      return usuario;
                  },
                  new { Id = id }
-             ).SingleOrDefault();
+             );
+
+            return usuarioMemory;
         }
 
         public override void Insert(Usuario entity)
