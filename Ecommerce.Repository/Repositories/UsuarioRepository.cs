@@ -4,29 +4,59 @@ using Ecommerce.Domain.Entities;
 using Ecommerce.Domain.IRepository;
 using Microsoft.Extensions.Options;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Ecommerce.Repository.Repositories
 {
     public class UsuarioRepository : BaseRepository<Usuario>, IUsuarioRepository
-    {        
+    {
         public UsuarioRepository(IOptions<AppSettings> appSettings) : base(appSettings)
-        {            
+        {
+        }
+
+        public override List<Usuario> GetAll()
+        {
+            var usuarios = new List<Usuario>();
+
+            Connection.Query<Usuario, Contato, EnderecoEntrega, Usuario>(
+                $"SELECT * FROM {nameof(Usuario)} T " +
+                $"LEFT JOIN {nameof(Contato)} C ON C.UsuarioId = T.Id " +
+                $"LEFT JOIN {nameof(EnderecoEntrega)} EE ON EE.UsuarioId = T.Id;",
+                (usuario, contato, enderecoEntrega) =>
+                {
+                    var usuarioMemory = usuarios.FirstOrDefault(x => x.Id == usuario.Id);
+
+                    if (usuarioMemory == null)
+                    {
+                        usuario.Contato = contato;
+                        usuario.AddEndereco(enderecoEntrega);
+                        usuarios.Add(usuario);
+                    }
+                    else
+                    {
+                        usuarioMemory.AddEndereco(enderecoEntrega);
+                    }                  
+
+                    return usuario;
+                });
+
+            return usuarios;
         }
 
         public override Usuario Get(long id)
         {
-           return Connection.Query<Usuario, Contato, Usuario>(
-                $"SELECT * FROM {nameof(Usuario)} T " +
-                $"LEFT JOIN {nameof(Contato)} C ON C.UsuarioId = T.Id " +
-                $"WHERE T.Id = @Id",
-                (usuario, contato) =>
-                {
-                    usuario.Contato = contato;
-                    return usuario;
-                },
-                new { Id = id}
-            ).SingleOrDefault();
+            return Connection.Query<Usuario, Contato, Usuario>(
+                 $"SELECT * FROM {nameof(Usuario)} T " +
+                 $"LEFT JOIN {nameof(Contato)} C ON C.UsuarioId = T.Id " +
+                 $"WHERE T.Id = @Id",
+                 (usuario, contato) =>
+                 {
+                     usuario.Contato = contato;
+                     return usuario;
+                 },
+                 new { Id = id }
+             ).SingleOrDefault();
         }
 
         public override void Insert(Usuario entity)
@@ -35,13 +65,13 @@ namespace Ecommerce.Repository.Repositories
             var transaction = Connection.BeginTransaction();
 
             try
-            {                
+            {
                 entity.Id = Connection.Query<long>(InsertSql<Usuario>(), entity, transaction).Single();
-                                
+
                 if (entity.Contato != null)
                 {
-                    entity.Contato.UsuarioId = entity.Id;                    
-                    entity.Contato.Id = Connection.Query<long>(InsertSql<Contato>(), entity.Contato, transaction).Single();                    
+                    entity.Contato.UsuarioId = entity.Id;
+                    entity.Contato.Id = Connection.Query<long>(InsertSql<Contato>(), entity.Contato, transaction).Single();
                 }
 
                 transaction.Commit();
@@ -66,8 +96,8 @@ namespace Ecommerce.Repository.Repositories
             {
                 Connection.Execute(UpdateSql<Usuario>(), entity, transaction);
 
-                if (entity.Contato != null)                
-                    Connection.Execute(UpdateSql<Contato>(), entity.Contato, transaction);                
+                if (entity.Contato != null)
+                    Connection.Execute(UpdateSql<Contato>(), entity.Contato, transaction);
 
                 transaction.Commit();
             }

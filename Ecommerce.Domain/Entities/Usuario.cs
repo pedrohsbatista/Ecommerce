@@ -23,8 +23,16 @@ namespace Ecommerce.Domain.Entities
 
         public Contato Contato { get; set; }
 
-        public ICollection<EnderecoEntrega> Enderecos { get; set; }
+        public ICollection<EnderecoEntrega> Enderecos { get; set; } = new List<EnderecoEntrega>();
 
         public ICollection<Departamento> Departamentos { get; set; }
+
+        public void AddEndereco(EnderecoEntrega enderecoEntrega)
+        {
+            if (enderecoEntrega == null)
+                return;
+
+            Enderecos.Add(enderecoEntrega);
+        }
     }
 }
