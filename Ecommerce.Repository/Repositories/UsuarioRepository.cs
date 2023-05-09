@@ -89,6 +89,12 @@ namespace Ecommerce.Repository.Repositories
                     entity.Contato.Id = Connection.Query<long>(InsertSql<Contato>(), entity.Contato, transaction).Single();
                 }
 
+                foreach (var enderecoEntrega in entity.Enderecos)
+                {
+                    enderecoEntrega.UsuarioId = entity.Id;
+                    enderecoEntrega.Id = Connection.Query<long>(InsertSql<EnderecoEntrega>(), enderecoEntrega, transaction).Single();
+                }
+
                 transaction.Commit();
             }
             catch (Exception)
