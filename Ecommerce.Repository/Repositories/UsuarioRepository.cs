@@ -120,6 +120,25 @@ namespace Ecommerce.Repository.Repositories
                 if (entity.Contato != null)
                     Connection.Execute(UpdateSql<Contato>(), entity.Contato, transaction);
 
+                var enderecosDb = Connection.Query<EnderecoEntrega>($"SELECT * FROM {nameof(EnderecoEntrega)} T WHERE T.UsuarioId = @UsuarioId", new { UsuarioId = entity.Id }, transaction).ToList();
+
+                foreach (var enderecoEntrega in entity.Enderecos.Where(x => x.Id == 0))
+                {
+                    enderecoEntrega.UsuarioId = entity.Id;
+                    enderecoEntrega.Id = Connection.Query<long>(InsertSql<EnderecoEntrega>(), enderecoEntrega, transaction).Single();
+                }
+
+                foreach (var enderecoEntregaDb in enderecosDb.Where(x => !entity.Enderecos.Any(y => y.Id == x.Id)))
+                {
+                    Connection.Query(DeleteSql<EnderecoEntrega>(), new { Id = enderecoEntregaDb.Id }, transaction);
+                }
+
+                foreach (var enderecoEntregaDb in enderecosDb.Where(x => entity.Enderecos.Any(y => y.Id == x.Id)))
+                {
+                    var enderecoEntregaMemory = entity.Enderecos.First();
+                    Connection.Query(UpdateSql<EnderecoEntrega>(), enderecoEntregaMemory, transaction);
+                }
+
                 transaction.Commit();
             }
             catch (Exception)
