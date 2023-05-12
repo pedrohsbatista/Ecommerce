@@ -25,7 +25,7 @@ namespace Ecommerce.Domain.Entities
 
         public ICollection<EnderecoEntrega> Enderecos { get; set; } = new List<EnderecoEntrega>();
 
-        public ICollection<Departamento> Departamentos { get; set; }
+        public ICollection<Departamento> Departamentos { get; set; } = new List<Departamento>();
 
         public void AddEndereco(EnderecoEntrega enderecoEntrega)
         {
@@ -33,6 +33,14 @@ namespace Ecommerce.Domain.Entities
                 return;
 
             Enderecos.Add(enderecoEntrega);
+        }
+
+        public void AddDepartamento(Departamento departamento)
+        {
+            if (departamento == null)
+                return;
+
+            Departamentos.Add(departamento);
         }
     }
 }

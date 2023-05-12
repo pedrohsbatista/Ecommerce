@@ -19,11 +19,13 @@ namespace Ecommerce.Repository.Repositories
         {
             var usuarios = new List<Usuario>();
 
-            Connection.Query<Usuario, Contato, EnderecoEntrega, Usuario>(
-                $"SELECT * FROM {nameof(Usuario)} T " +
+            Connection.Query<Usuario, Contato, EnderecoEntrega, Departamento, Usuario>(
+                $"SELECT T.*, C.*, EE.*, D.* FROM {nameof(Usuario)} T " +
                 $"LEFT JOIN {nameof(Contato)} C ON C.UsuarioId = T.Id " +
-                $"LEFT JOIN {nameof(EnderecoEntrega)} EE ON EE.UsuarioId = T.Id;",
-                (usuario, contato, enderecoEntrega) =>
+                $"LEFT JOIN {nameof(EnderecoEntrega)} EE ON EE.UsuarioId = T.Id " +
+                $"LEFT JOIN UsuarioDepartamento UD ON UD.UsuarioId = T.Id " +
+                $"LEFT JOIN {nameof(Departamento)} D ON D.Id = UD.DepartamentoId;",
+                (usuario, contato, enderecoEntrega, departamento) =>
                 {
                     var usuarioMemory = usuarios.FirstOrDefault(x => x.Id == usuario.Id);
 
@@ -31,11 +33,16 @@ namespace Ecommerce.Repository.Repositories
                     {
                         usuario.Contato = contato;
                         usuario.AddEndereco(enderecoEntrega);
+                        usuario.AddDepartamento(departamento);
                         usuarios.Add(usuario);
                     }
                     else
                     {
-                        usuarioMemory.AddEndereco(enderecoEntrega);
+                        if (!usuarioMemory.Enderecos.Any(x => x.Id == enderecoEntrega.Id))
+                            usuarioMemory.AddEndereco(enderecoEntrega);
+
+                        if (!usuarioMemory.Departamentos.Any(x => x.Id == departamento.Id))
+                            usuarioMemory.AddDepartamento(departamento);
                     }                  
 
                     return usuario;
