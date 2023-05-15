@@ -23,7 +23,7 @@ namespace Ecommerce.Repository.Repositories
                 $"SELECT T.*, C.*, EE.*, D.* FROM {nameof(Usuario)} T " +
                 $"LEFT JOIN {nameof(Contato)} C ON C.UsuarioId = T.Id " +
                 $"LEFT JOIN {nameof(EnderecoEntrega)} EE ON EE.UsuarioId = T.Id " +
-                $"LEFT JOIN UsuarioDepartamento UD ON UD.UsuarioId = T.Id " +
+                $"LEFT JOIN {nameof(Usuario)}{nameof(Departamento)} UD ON UD.UsuarioId = T.Id " +
                 $"LEFT JOIN {nameof(Departamento)} D ON D.Id = UD.DepartamentoId;",
                 (usuario, contato, enderecoEntrega, departamento) =>
                 {
@@ -55,23 +55,30 @@ namespace Ecommerce.Repository.Repositories
         {
             Usuario usuarioMemory = null;
 
-            Connection.Query<Usuario, Contato, EnderecoEntrega, Usuario>(
-                 $"SELECT * FROM {nameof(Usuario)} T " +
+            Connection.Query<Usuario, Contato, EnderecoEntrega, Departamento, Usuario>(
+                 $"SELECT T.*, C.*, EE.*, D.* FROM {nameof(Usuario)} T " +
                  $"LEFT JOIN {nameof(Contato)} C ON C.UsuarioId = T.Id " +
                  $"LEFT JOIN {nameof(EnderecoEntrega)} EE ON EE.UsuarioId = T.Id " +
-                 $"WHERE T.Id = @Id",
-                 (usuario, contato, enderecoEntrega) =>
+                 $"LEFT JOIN {nameof(Usuario)}{nameof(Departamento)} UD ON UD.UsuarioId = T.Id " +
+                 $"LEFT JOIN {nameof(Departamento)} D ON D.Id = UD.DepartamentoId " +
+                 $"WHERE T.Id = @Id;",
+                 (usuario, contato, enderecoEntrega, departamento) =>
                  {
                      if (usuarioMemory == null)
                      {
                          usuario.Contato = contato;
                          usuario.AddEndereco(enderecoEntrega);
+                         usuario.AddDepartamento(departamento);
                          usuarioMemory = usuario;
                      }
                      else
                      {
-                         usuarioMemory.AddEndereco(enderecoEntrega);
-                     }                                                           
+                         if (!usuarioMemory.Enderecos.Any(x => x.Id == enderecoEntrega.Id))
+                            usuarioMemory.AddEndereco(enderecoEntrega);
+
+                         if (!usuarioMemory.Departamentos.Any(x => x.Id == departamento.Id))
+                            usuarioMemory.AddDepartamento(departamento);
+                     }
 
                      return usuario;
                  },
