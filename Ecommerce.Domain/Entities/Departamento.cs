@@ -6,6 +6,6 @@ namespace Ecommerce.Domain.Entities
     {
         public string Nome { get; set; }
 
-        public ICollection<Usuario> Usuarios { get; set; }
+        public ICollection<UsuarioDepartamento> Usuarios { get; set; }
     }
 }
