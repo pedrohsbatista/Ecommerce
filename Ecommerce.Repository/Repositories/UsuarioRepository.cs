@@ -113,7 +113,7 @@ namespace Ecommerce.Repository.Repositories
                 {
                     usuarioDepartamento.UsuarioId = entity.Id;
                     usuarioDepartamento.DepartamentoId = usuarioDepartamento.Departamento.Id;
-                    Connection.Execute(InsertSql<UsuarioDepartamento>(), usuarioDepartamento, transaction);
+                    usuarioDepartamento.Id = Connection.Query<long>(InsertSql<UsuarioDepartamento>(), usuarioDepartamento, transaction).Single();
                 }
 
                 transaction.Commit();
@@ -156,8 +156,31 @@ namespace Ecommerce.Repository.Repositories
 
                 foreach (var enderecoEntregaDb in enderecosDb.Where(x => entity.Enderecos.Any(y => y.Id == x.Id)))
                 {
-                    var enderecoEntregaMemory = entity.Enderecos.First();
+                    var enderecoEntregaMemory = entity.Enderecos.First(x => x.Id == enderecoEntregaDb.Id);
+                    enderecoEntregaMemory.UsuarioId = entity.Id;
                     Connection.Query(UpdateSql<EnderecoEntrega>(), enderecoEntregaMemory, transaction);
+                }
+
+                var departamentosDb = Connection.Query<UsuarioDepartamento>($"SELECT * FROM {nameof(UsuarioDepartamento)} T WHERE T.UsuarioId = @UsuarioId", new { UsuarioId = entity.Id }, transaction).ToList();
+
+                foreach (var usuarioDepartamento in entity.Departamentos.Where(x => x.Id == 0))
+                {
+                    usuarioDepartamento.UsuarioId = entity.Id;
+                    usuarioDepartamento.DepartamentoId = usuarioDepartamento.Departamento.Id;
+                    usuarioDepartamento.Id = Connection.Query<long>(InsertSql<UsuarioDepartamento>(), usuarioDepartamento, transaction).Single();
+                }
+
+                foreach (var usuarioDepartamentoDb in departamentosDb.Where(x => !entity.Departamentos.Any(y => y.Id == x.Id)))
+                {
+                    Connection.Query(DeleteSql<UsuarioDepartamento>(), new { Id = usuarioDepartamentoDb.Id }, transaction);
+                }
+
+                foreach (var usuarioDepartamentoDb in departamentosDb.Where(x => entity.Departamentos.Any(y => y.Id == x.Id)))
+                {
+                    var usuarioDepartamentoMemory = entity.Departamentos.First(x => x.Id == usuarioDepartamentoDb.Id);
+                    usuarioDepartamentoMemory.UsuarioId = entity.Id;
+                    usuarioDepartamentoMemory.DepartamentoId = usuarioDepartamentoMemory.Departamento.Id;
+                    Connection.Query(UpdateSql<UsuarioDepartamento>(), usuarioDepartamentoMemory, transaction);
                 }
 
                 transaction.Commit();
