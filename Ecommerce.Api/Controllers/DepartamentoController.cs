@@ -6,10 +6,10 @@ namespace Ecommerce.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class UsuarioController : BaseController<Usuario>
-    {        
-        public UsuarioController(UsuarioService usuarioService) : base(usuarioService)
-        {
+    public class DepartamentoController : BaseController<Departamento>
+    {       
+        public DepartamentoController(DepartamentoService departamentoService) : base(departamentoService)
+        {     
         }
     }
 }

@@ -136,10 +136,24 @@ namespace Ecommerce.Repository.Repositories
 
             try
             {
-                Connection.Execute(UpdateSql<Usuario>(), entity, transaction);
-
+                Connection.Execute(UpdateSql<Usuario>(), entity, transaction);                                
+                
                 if (entity.Contato != null)
-                    Connection.Execute(UpdateSql<Contato>(), entity.Contato, transaction);
+                {
+                    entity.Contato.UsuarioId = entity.Id;
+
+                    if (entity.Contato.Id == 0)                                            
+                        entity.Contato.Id = Connection.Query<long>(InsertSql<Contato>(), entity.Contato, transaction).Single();                    
+                    else                    
+                        Connection.Execute(UpdateSql<Contato>(), entity.Contato, transaction);                                      
+                }
+                else
+                {
+                    var contatoDb = Connection.QuerySingleOrDefault<Contato>($"SELECT * FROM {nameof(Contato)} T WHERE T.UsuarioId = @UsuarioId", new { UsuarioId = entity.Id }, transaction);
+                    
+                    if (contatoDb != null)
+                        Connection.Execute(DeleteSql<Contato>(), contatoDb, transaction);
+                }
 
                 var enderecosDb = Connection.Query<EnderecoEntrega>($"SELECT * FROM {nameof(EnderecoEntrega)} T WHERE T.UsuarioId = @UsuarioId", new { UsuarioId = entity.Id }, transaction).ToList();
 
