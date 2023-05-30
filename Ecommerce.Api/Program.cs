@@ -2,7 +2,7 @@ using Ecommerce.Domain.Config;
 using Ecommerce.Domain.IRepository;
 using Ecommerce.Domain.Services;
 using Ecommerce.Repository.Repositories;
-using Microsoft.Extensions.Configuration;
+using Ecommerce.RepositoryContrib.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,7 +18,7 @@ builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSet
 builder.Services.AddScoped<UsuarioService>();
 builder.Services.AddScoped<DepartamentoService>();
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
-builder.Services.AddScoped<IDepartamentoRepository, DepartamentoRepository>();
+builder.Services.AddScoped<IDepartamentoRepository, DepartamentoRepositoryContrib>();
 
 var app = builder.Build();
 

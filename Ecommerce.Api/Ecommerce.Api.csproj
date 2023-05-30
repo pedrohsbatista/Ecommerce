@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Ecommerce.Domain\Ecommerce.Domain.csproj" />
+    <ProjectReference Include="..\Ecommerce.RepositoryContrib\Ecommerce.RepositoryContrib.csproj" />
     <ProjectReference Include="..\Ecommerce.Repository\Ecommerce.Repository.csproj" />
   </ItemGroup>
 
