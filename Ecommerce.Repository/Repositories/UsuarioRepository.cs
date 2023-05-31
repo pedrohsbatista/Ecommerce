@@ -209,5 +209,24 @@ namespace Ecommerce.Repository.Repositories
                 Connection.Close();
             }
         }
+
+        public Usuario GetContatoAndEndereco(long id)
+        {
+            var sql = $"SELECT * FROM Usuario T WHERE T.Id = @Id; " +
+                      "SELECT * FROM Contato T WHERE T.UsuarioId = @Id; " +
+                      "SELECT * FROM EnderecoEntrega T WHERE T.UsuarioId = @Id;";
+
+            using var multipleResultSet = Connection.QueryMultiple(sql, new { Id = id });
+
+            var usuario = multipleResultSet.Read<Usuario>().SingleOrDefault();
+
+            if (usuario == null)
+                return null;
+
+            usuario.Contato = multipleResultSet.Read<Contato>().SingleOrDefault();
+            usuario.Enderecos = multipleResultSet.Read<EnderecoEntrega>().ToList();
+
+            return usuario;
+        }
     }
 }
