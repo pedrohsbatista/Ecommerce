@@ -1,10 +1,12 @@
 ﻿using Dapper;
 using Ecommerce.Domain.Config;
+using Ecommerce.Domain.Storeds;
 using Ecommerce.Domain.Entities;
 using Ecommerce.Domain.IRepository;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 
 namespace Ecommerce.Repository.Repositories
@@ -32,8 +34,8 @@ namespace Ecommerce.Repository.Repositories
                     if (usuarioMemory == null)
                     {
                         usuario.Contato = contato;
-                        usuario.AddEndereco(enderecoEntrega);                        
-                        usuario.AddDepartamento(usuarioDepartamento, departamento);                        
+                        usuario.AddEndereco(enderecoEntrega);
+                        usuario.AddDepartamento(usuarioDepartamento, departamento);
                         usuarios.Add(usuario);
                     }
                     else
@@ -41,9 +43,9 @@ namespace Ecommerce.Repository.Repositories
                         if (!usuarioMemory.Enderecos.Any(x => x.Id == enderecoEntrega.Id))
                             usuarioMemory.AddEndereco(enderecoEntrega);
 
-                        if (!usuarioMemory.Departamentos.Any(x => x.Id == usuarioDepartamento.Id))                                                    
-                            usuarioMemory.AddDepartamento(usuarioDepartamento, departamento);                        
-                    }                  
+                        if (!usuarioMemory.Departamentos.Any(x => x.Id == usuarioDepartamento.Id))
+                            usuarioMemory.AddDepartamento(usuarioDepartamento, departamento);
+                    }
 
                     return usuario;
                 });
@@ -67,17 +69,17 @@ namespace Ecommerce.Repository.Repositories
                      if (usuarioMemory == null)
                      {
                          usuario.Contato = contato;
-                         usuario.AddEndereco(enderecoEntrega);                         
+                         usuario.AddEndereco(enderecoEntrega);
                          usuario.AddDepartamento(usuarioDepartamento, departamento);
                          usuarioMemory = usuario;
                      }
                      else
                      {
                          if (!usuarioMemory.Enderecos.Any(x => x.Id == enderecoEntrega.Id))
-                            usuarioMemory.AddEndereco(enderecoEntrega);
+                             usuarioMemory.AddEndereco(enderecoEntrega);
 
-                         if (!usuarioMemory.Departamentos.Any(x => x.Id == usuarioDepartamento.Id))                                                     
-                             usuarioMemory.AddDepartamento(usuarioDepartamento, departamento);                         
+                         if (!usuarioMemory.Departamentos.Any(x => x.Id == usuarioDepartamento.Id))
+                             usuarioMemory.AddDepartamento(usuarioDepartamento, departamento);
                      }
 
                      return usuario;
@@ -136,23 +138,23 @@ namespace Ecommerce.Repository.Repositories
 
             try
             {
-                Connection.Execute(UpdateSql<Usuario>(), entity, transaction);                                
-                
+                Connection.Execute(UpdateSql<Usuario>(), entity, transaction);
+
                 if (entity.Contato != null)
                 {
                     entity.Contato.UsuarioId = entity.Id;
 
-                    if (entity.Contato.Id == 0)                                            
-                        entity.Contato.Id = Connection.Query<long>(InsertSql<Contato>(), entity.Contato, transaction).Single();                    
-                    else                    
-                        Connection.Execute(UpdateSql<Contato>(), entity.Contato, transaction);                                      
+                    if (entity.Contato.Id == 0)
+                        entity.Contato.Id = Connection.Query<long>(InsertSql<Contato>(), entity.Contato, transaction).Single();
+                    else
+                        Connection.Execute(UpdateSql<Contato>(), entity.Contato, transaction);
                 }
                 else
                 {
                     var contatoDb = Connection.QuerySingleOrDefault<Contato>($"SELECT * FROM {nameof(Contato)} T WHERE T.UsuarioId = @UsuarioId", new { UsuarioId = entity.Id }, transaction);
-                    
+
                     if (contatoDb != null)
-                        Connection.Execute(DeleteSql<Contato>(), new { Id = contatoDb.Id },  transaction);
+                        Connection.Execute(DeleteSql<Contato>(), new { Id = contatoDb.Id }, transaction);
                 }
 
                 var enderecosDb = Connection.Query<EnderecoEntrega>($"SELECT * FROM {nameof(EnderecoEntrega)} T WHERE T.UsuarioId = @UsuarioId", new { UsuarioId = entity.Id }, transaction).ToList();
@@ -227,6 +229,42 @@ namespace Ecommerce.Repository.Repositories
             usuario.Enderecos = multipleResultSet.Read<EnderecoEntrega>().ToList();
 
             return usuario;
+        }
+
+        public List<StoredUsuario> StoredGetAll()
+        {
+            return Connection.Query<StoredUsuario>("GetAllUsuario", commandType: CommandType.StoredProcedure).ToList();
+        }
+
+        public StoredUsuario StoredGet(long id)
+        {
+            return Connection.Query<StoredUsuario>("GetByIdUsuario", new { Id = id }, commandType: CommandType.StoredProcedure).FirstOrDefault();
+        }
+
+        public void StoredInsert(StoredUsuario entity)
+        {
+            entity.Id = Connection.Query<long>("InsertUsuario", new
+            {
+                entity.Nome,
+                entity.Email,
+                entity.Sexo,
+                entity.Rg,
+                entity.Cpf,
+                entity.NomeMae,
+                entity.SituacaoCadastro,
+                entity.DataCadastro
+            },
+            commandType: CommandType.StoredProcedure).FirstOrDefault();
+        }
+
+        public void StoredUpdate(StoredUsuario entity)
+        {
+            Connection.Query("UpdateUsuario", entity, commandType: CommandType.StoredProcedure);
+        }
+
+        public void StoredDelete(long id)
+        {
+            Connection.Query("DeleteUsuario", new { Id = id }, commandType: CommandType.StoredProcedure);
         }
     }
 }

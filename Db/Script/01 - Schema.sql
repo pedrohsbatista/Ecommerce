@@ -61,12 +61,12 @@ go
 
 
 -- Store Procedures na tabela de Usuarios
-CREATE PROCEDURE dbo.SelecionarUsuarios
+CREATE PROCEDURE dbo.GetAllUsuario
 AS
     SELECT * FROM [dbo].[Usuario]
 go
 
-CREATE PROCEDURE dbo.SelecionarUsuario
+CREATE PROCEDURE dbo.GetByIdUsuario
 (
 	@id int
 )
@@ -74,7 +74,7 @@ AS
     SELECT * FROM [dbo].[Usuario] WHERE Id = @id
 go
 
-CREATE PROCEDURE dbo.CadastrarUsuario
+CREATE PROCEDURE dbo.InsertUsuario
 (
 	@nome varchar(70),
 	@email varchar(100),
@@ -92,7 +92,7 @@ go
 
 
 
-CREATE PROCEDURE dbo.AtualizarUsuario 
+CREATE PROCEDURE dbo.UpdateUsuario 
 (
 	@id int,
 	@nome varchar(70),
@@ -117,7 +117,7 @@ AS
 	WHERE Id = @id
 go
 
-CREATE PROCEDURE dbo.DeletarUsuario
+CREATE PROCEDURE dbo.DeleteUsuario
 (
 	@id int
 )
