@@ -1,6 +1,8 @@
+using Dapper.FluentMap;
 using Ecommerce.Domain.Config;
 using Ecommerce.Domain.IRepository;
 using Ecommerce.Domain.Services;
+using Ecommerce.Repository.Maps;
 using Ecommerce.Repository.Repositories;
 using Ecommerce.RepositoryContrib.Repositories;
 
@@ -18,7 +20,12 @@ builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSet
 builder.Services.AddScoped<UsuarioService>();
 builder.Services.AddScoped<DepartamentoService>();
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
-builder.Services.AddScoped<IDepartamentoRepository, DepartamentoRepositoryContrib>();
+builder.Services.AddScoped<IDepartamentoRepository, DepartamentoRepository>();
+
+FluentMapper.Initialize(config =>
+{
+    config.AddMap(new DepartamentoMap());
+});
 
 var app = builder.Build();
 
